@@ -1,0 +1,23 @@
+{
+  "skill_id": "ovos-skill-white-noise.andlo",
+  "source": "https://github.com/andlo/ovos-skill-white-noise",
+  "package_name": "ovos-skill-white-noise",
+  "pip_spec": "ovos-skill-white-noise",
+  "license": "GPL-3.0-or-later",
+  "author": "andlo",
+  "name": "WhiteNoise",
+  "description": "An ambient sound machine for OVOS - white/brown noise, rain, ocean waves, fan noise, looped for sleep or focus. A surprisingly common voice-assistant feature (Alexa/Google both have it) that's missing from the OVOS ecosystem (checked before starting). Needs a small library of loopable ambient tracks, sourced the same way as ovos-skill-sound-like's bundled sounds (CC0-verified).",
+  "examples": [
+    "play white noise",
+    "play rain sounds",
+    "stop the ambient sound"
+  ],
+  "tags": [
+    "ambient",
+    "sleep",
+    "focus",
+    "white noise",
+    "relaxation"
+  ],
+  "icon": "https://raw.githubusercontent.com/andlo/ovos-skill-white-noise/main/icon.png"
+}

@@ -1,0 +1,23 @@
+{
+  "skill_id": "ovos-skill-white-noise.andlo",
+  "source": "https://github.com/andlo/ovos-skill-white-noise",
+  "package_name": "ovos-skill-white-noise",
+  "pip_spec": "ovos-skill-white-noise",
+  "license": "GPL-3.0-or-later",
+  "author": "andlo",
+  "name": "WhiteNoise",
+  "description": "En ambient-lydmaskine til OVOS - hvid/broen stoej, regn, hav, ventilator, i loop til soevn eller fokus. En overraskende almindelig stemme-assistent-funktion (Alexa/Google har begge) som mangler i OVOS-oekosystemet (tjekket foer opstart). Kraever et lille bibliotek af loop-bare ambient-spor, kildet paa samme maade som ovos-skill-sound-like's bundlede lyde (CC0-verificeret).",
+  "examples": [
+    "spil hvid stoej",
+    "spil regnlyde",
+    "stop ambient-lyden"
+  ],
+  "tags": [
+    "ambient",
+    "sleep",
+    "focus",
+    "white noise",
+    "relaxation"
+  ],
+  "icon": "https://raw.githubusercontent.com/andlo/ovos-skill-white-noise/main/icon.png"
+}

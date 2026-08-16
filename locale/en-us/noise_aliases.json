@@ -1,0 +1,10 @@
+{
+  "_notes": [
+    "Keys are the spoken descriptor word, values are the key in NOISE_GENERATORS (__init__.py)."
+  ],
+  "white": "white",
+  "pink": "pink",
+  "brown": "brown",
+  "brownian": "brown",
+  "red": "brown"
+}

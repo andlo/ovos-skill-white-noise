@@ -284,7 +284,12 @@ class WhiteNoise(OVOSCommonPlaybackSkill):
             return []
         noise_type, confidence = match
         return [MediaEntry(
-            uri=f"file://{CACHE_DIR / noise_type}.wav",  # generated on play
+            # Not a file:// or real path on purpose: OCP's files extractor
+            # would claim it and turn it into PlaybackType.AUDIO (SKILL is 0,
+            # so OCP's "fill only empty fields" merge overwrites it), and mpv
+            # would try to play a clip that isn't generated yet. A path-like
+            # uri that is no file passes OCP's filter and stays ours.
+            uri=f"/{self.skill_id}/{noise_type}",
             title=f"{noise_type.capitalize()} noise",
             artist="White Noise",
             media_type=media_type if media_type in OCP_MEDIA else MediaType.AUDIO,
@@ -298,7 +303,7 @@ class WhiteNoise(OVOSCommonPlaybackSkill):
     def play_noise(self, message=None):
         """OCP picked our search result - play it ourselves."""
         uri = (message.data.get("uri") if message else "") or ""
-        noise_type = Path(uri).stem
+        noise_type = uri.rstrip("/").rsplit("/", 1)[-1]
         if noise_type not in NOISE_GENERATORS:
             noise_type = DEFAULT_NOISE
         self._start(noise_type)

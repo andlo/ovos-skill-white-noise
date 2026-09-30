@@ -25,7 +25,8 @@ def _no_entity_autoregister(monkeypatch):
 ])
 def test_search_answers_noise_phrases(skill, phrase, noise, conf):
     [r] = skill.search_noise(phrase, MediaType.MUSIC)
-    assert r.uri.endswith(f"/{noise}.wav")
+    assert r.uri == f"/{skill.skill_id}/{noise}"
+    assert not r.uri.startswith("file:")  # files extractor would make it AUDIO
     assert r.match_confidence == conf
     assert r.playback == PlaybackType.SKILL
     assert r.media_type == MediaType.MUSIC  # echoed, so OCP's filter keeps it
@@ -44,16 +45,16 @@ def test_search_ignores_other_phrases(skill, phrase):
 def test_search_danish(skill, monkeypatch):
     monkeypatch.setattr(wn.WhiteNoise, "lang", "da-dk", raising=False)
     [r] = skill.search_noise("noget hvid støj", MediaType.AUDIO)
-    assert r.uri.endswith("/white.wav") and r.match_confidence == 100
+    assert r.uri.endswith("/white") and r.match_confidence == 100
 
 
 def test_ocp_play_starts_the_right_noise(skill, monkeypatch):
     started = []
     monkeypatch.setattr(skill, "_start", started.append)
     msg = MagicMock()
-    msg.data = {"uri": "file:///tmp/ovos-skill-white-noise/pink.wav"}
+    msg.data = {"uri": "/ovos-skill-white-noise.andlo/pink"}
     skill.play_noise(msg)
-    msg.data = {"uri": "file:///evil/../whatever.wav"}
+    msg.data = {"uri": "/ovos-skill-white-noise.andlo/../../etc/passwd"}
     skill.play_noise(msg)
     assert started == ["pink", "white"]
 

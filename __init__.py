@@ -67,14 +67,17 @@ tones, drum hits), even though the underlying content is "random".
 
 import json
 import random
+import re
 import struct
 import tempfile
 import threading
 import wave
 from pathlib import Path
 
-from ovos_workshop.skills import OVOSSkill
+from ovos_utils.ocp import MediaEntry, MediaType, PlaybackType
 from ovos_workshop.decorators import intent_handler
+from ovos_workshop.decorators.ocp import ocp_play, ocp_search
+from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
 
 SAMPLE_RATE = 44100
 CLIP_DURATION_SECONDS = 20
@@ -175,11 +178,26 @@ def _load_noise_aliases_from_disk():
 
 NOISE_ALIASES = _load_noise_aliases_from_disk()
 
+# "play ..." is taken by the OCP pipeline before padatious ever sees it,
+# so the skill also answers OCP's search (issue #2). OCP only asks skills
+# that support the media type it guessed; for "play white noise" that can
+# be AUDIO, MUSIC or GENERIC, so all three are accepted, and the result
+# echoes the query's type so OCP's media-type filter keeps it.
+OCP_MEDIA = [MediaType.AUDIO, MediaType.MUSIC, MediaType.GENERIC]
+OCP_CONF_COLOUR = 100   # "white noise", "pink noise" - clearly ours
+OCP_CONF_GENERIC = 90   # "some noise", "background noise"
 
-class WhiteNoise(OVOSSkill):
+
+class WhiteNoise(OVOSCommonPlaybackSkill):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, supported_media=OCP_MEDIA,
+                         skill_icon=str(SKILL_ROOT / "icon.png"), **kwargs)
 
     def initialize(self):
-        self._stop_event = threading.Event()
+        # NB: not self._noise_stop - OVOSCommonPlaybackSkill uses that
+        # name for its search, and sets it whenever an OCP search stops.
+        self._noise_stop = threading.Event()
         self._thread = None
         self._last_noise_type = None
 
@@ -196,23 +214,23 @@ class WhiteNoise(OVOSSkill):
 
     def _loop(self, noise_type):
         path = _noise_clip_path(noise_type)
-        while not self._stop_event.is_set():
+        while not self._noise_stop.is_set():
             self.play_audio(path, instant=True)
             # Event.wait() returns AS SOON AS the event is set, not
             # after the full timeout - this is what lets "stop" take
             # effect promptly rather than only being checked once per
             # full clip length.
-            self._stop_event.wait(CLIP_DURATION_SECONDS)
+            self._noise_stop.wait(CLIP_DURATION_SECONDS)
 
     def _start(self, noise_type):
         self._stop()
         self._last_noise_type = noise_type
-        self._stop_event.clear()
+        self._noise_stop.clear()
         self._thread = threading.Thread(target=self._loop, args=(noise_type,), daemon=True)
         self._thread.start()
 
     def _stop(self):
-        self._stop_event.set()
+        self._noise_stop.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2)
         self._thread = None
@@ -222,6 +240,68 @@ class WhiteNoise(OVOSSkill):
 
     def shutdown(self):
         self._stop()
+
+    # ------------------------------------------------------------------
+    # Global "stop" and OCP's stop
+    # ------------------------------------------------------------------
+
+    def can_stop(self, message=None) -> bool:
+        return self._is_running()
+
+    def stop(self):
+        if not self._is_running():
+            return False
+        self._stop()
+        return True
+
+    # ------------------------------------------------------------------
+    # OCP: "play white noise" (issue #2)
+    # ------------------------------------------------------------------
+
+    def _ocp_match(self, phrase, lang):
+        """(noise_type, confidence) when the phrase asks for noise and
+        nothing else, e.g. "white noise", "some pink noise for sleep".
+        Anything left over ("white noise by some band") is not ours."""
+        words = re.findall(r"\w+", (phrase or "").lower())
+        noise_words = {w.lower() for w in self.voc_list("noise", lang)}
+        if not noise_words.intersection(words):
+            return None
+        aliases = self._noise_aliases_for(lang)
+        filler = {w.lower() for w in self.voc_list("filler", lang)}
+        colour = next((aliases[w] for w in words if w in aliases), None)
+        rest = [w for w in words
+                if w not in noise_words and w not in aliases and w not in filler]
+        if rest:
+            return None
+        if colour:
+            return colour, OCP_CONF_COLOUR
+        return self._last_noise_type or DEFAULT_NOISE, OCP_CONF_GENERIC
+
+    @ocp_search()
+    def search_noise(self, phrase, media_type=MediaType.GENERIC):
+        match = self._ocp_match(phrase, self.lang)
+        if not match:
+            return []
+        noise_type, confidence = match
+        return [MediaEntry(
+            uri=f"file://{CACHE_DIR / noise_type}.wav",  # generated on play
+            title=f"{noise_type.capitalize()} noise",
+            artist="White Noise",
+            media_type=media_type if media_type in OCP_MEDIA else MediaType.AUDIO,
+            playback=PlaybackType.SKILL,
+            match_confidence=confidence,
+            skill_icon=self.skill_icon,
+            skill_id=self.skill_id,
+        )]
+
+    @ocp_play()
+    def play_noise(self, message=None):
+        """OCP picked our search result - play it ourselves."""
+        uri = (message.data.get("uri") if message else "") or ""
+        noise_type = Path(uri).stem
+        if noise_type not in NOISE_GENERATORS:
+            noise_type = DEFAULT_NOISE
+        self._start(noise_type)
 
     @intent_handler("set_noise.intent")
     def handle_set_noise(self, message):

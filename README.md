@@ -16,6 +16,16 @@ focus. White, pink, and brown noise, **all generated**, not recorded.
 "stop støjen"             (Danish)
 ```
 
+## How "play ..." reaches this skill
+
+On an OVOS install the OCP media pipeline takes every sentence that
+starts with "play" before normal intents are tried. So the skill also
+answers OCP's search: a phrase that asks for noise and nothing else
+("white noise", "some pink noise for sleep", "background noise") gets
+this skill's result with top confidence, and OCP hands playback back to
+the skill. Anything else ("white noise by some band") is left to the
+music skills. The global "stop" works too.
+
 ## Why no rain/ocean/fan sounds
 
 The original brief mentioned rain and ocean waves too. Those need

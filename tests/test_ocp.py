@@ -67,3 +67,19 @@ def test_stop_ends_noise_and_reports_it(skill, monkeypatch):
     assert skill.can_stop() is True
     assert skill.stop() is True
     assert not skill._is_running()
+
+
+def test_ocp_play_path_through_workshop(skill, monkeypatch):
+    """The real route: OCP -> ovos.common_play.<skill_id>.play ->
+    OVOSCommonPlaybackSkill's handler -> play_noise. On workshop 7.x that
+    handler calls self.activate() first."""
+    import threading
+    started = []
+    monkeypatch.setattr(skill, "_start", started.append)
+    skill._playing, skill._paused = threading.Event(), threading.Event()
+    skill._OVOSCommonPlaybackSkill__playback_handler = skill.play_noise
+    msg = MagicMock()
+    msg.data = {"uri": f"/{skill.skill_id}/brown"}
+    skill._OVOSCommonPlaybackSkill__handle_ocp_play(msg)
+    assert started == ["brown"]
+    skill.activate()  # exists (workshop 7.x calls it)

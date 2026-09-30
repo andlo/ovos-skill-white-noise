@@ -299,6 +299,13 @@ class WhiteNoise(OVOSCommonPlaybackSkill):
             skill_id=self.skill_id,
         )]
 
+    def activate(self, duration_minutes=None):
+        """ovos-workshop 7.x (stable/testing): OVOSCommonPlaybackSkill's
+        play handler calls self.activate(), which only ConversationalSkill
+        has there, so PlaybackType.SKILL playback fails with an
+        AttributeError. 9.x dropped the call. Nothing to do here - this
+        skill doesn't converse."""
+
     @ocp_play()
     def play_noise(self, message=None):
         """OCP picked our search result - play it ourselves."""

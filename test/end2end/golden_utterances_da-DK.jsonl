@@ -1,0 +1,6 @@
+{"utterance": "spil hvid støj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "start pink støj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "spil noget brun støj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "spil noget støj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}
+{"utterance": "spil ambient støj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}
+{"utterance": "start noget baggrundsstøj", "lang": "da-DK", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}

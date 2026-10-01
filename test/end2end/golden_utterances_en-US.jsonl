@@ -1,0 +1,7 @@
+{"utterance": "play white noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "start pink noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "play some brown noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "set_noise"}
+{"utterance": "play some noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}
+{"utterance": "play ambient noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}
+{"utterance": "start some background noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "start_noise"}
+{"utterance": "stop the background noise", "lang": "en-US", "skill_id": "ovos-skill-white-noise.andlo", "intent_label": "stop_noise"}
